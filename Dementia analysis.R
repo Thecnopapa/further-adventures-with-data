@@ -1,15 +1,19 @@
 library(ggplot2)
 library(tidyverse)
 library(janitor)
+library(GGally)
+#library()
+
+getwd()
 
 patients <-
-  read.csv("~/Further adventures with data/Data/oasis_longitudinal.csv")
+  read.csv("~/Further adventures with data/further-adventures-with-data/Data/oasis_longitudinal.csv")
 View(patients)
 patients <- clean_names(patients)
 patients$cdr_num <- patients$cdr
 patients$cdr <- factor(patients$cdr)
 
-
+summary(patients$cdr)
 
 
 ggplot(patients, aes(y = age, x = group)) +
@@ -57,6 +61,10 @@ delta <- summarise(
   nwbv_change = last(n_wbv) - first(n_wbv)
 )
 
+delta %>% 
+  select(-subject_id) %>%
+  ggpairs()
+
 
 by_id <- group_by (merge(by_id, delta), subject_id)
 
@@ -86,3 +94,13 @@ ggplot(by_id, aes(x = age_change, y = nwbv_change, color = cdr)) +
 ggplot(by_id, aes(x = age_change, y = etiv_change, color = cdr)) +
   geom_point() +
   geom_smooth(method = lm)
+
+
+patients %>% filter(is.na(ses))
+
+patients_noses <- patients %>% select(- ses, - hand, -cdr_num, -asf) %>% filter(!is.na(mmse))
+summary(patients_noses)
+
+patients_noses %>% 
+  select(-subject_id, -mri_id) %>%
+  ggpairs()
